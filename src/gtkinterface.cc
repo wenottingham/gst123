@@ -45,6 +45,14 @@ key_press_event_cb (GtkWidget *widget, GdkEventKey *event, gpointer data)
 }
 
 static gboolean
+button_press_event_cb (GtkWidget *widget, GdkEventButton *event, gpointer data)
+{
+  GtkInterface *gtk_interface = static_cast<GtkInterface *> (data);
+
+  return gtk_interface->handle_buttonpress_event (event);
+}
+
+static gboolean
 motion_notify_event_cb (GtkWidget *widget, GdkEventMotion *event, gpointer data)
 {
   GtkInterface *gtk_interface = static_cast<GtkInterface *> (data);
@@ -333,6 +341,17 @@ GtkInterface::handle_keypress_event (GdkEventKey *event)
   return false;
 }
 
+bool
+GtkInterface::handle_buttonpress_event (GdkEventButton *event)
+{
+  if (event->button == 1 && event->state == 0)
+    {
+      key_handler->process_input (' ');
+      return true;
+    }
+  return false;
+}
+
 void
 GtkInterface::set_title (const string& title)
 {
@@ -345,6 +364,7 @@ GtkInterface::set_video_widget (GtkWidget *widget)
 {
   video_widget = widget;
   gtk_container_add (GTK_CONTAINER(gtk_window), video_widget);
+  g_signal_connect (G_OBJECT (video_widget), "button-press-event", G_CALLBACK (button_press_event_cb), this);
   gtk_widget_show (video_widget);
 }
 
