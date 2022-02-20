@@ -121,11 +121,18 @@ GtkInterface::init (int *argc, char ***argv, KeyHandler *handler)
       video_fullscreen = Options::the().fullscreen;    // initially fullscreen?
 
       // make background black
-      GdkRGBA color;
-      gdk_rgba_parse (&color, "black");
-      gtk_widget_override_background_color (gtk_window, GTK_STATE_FLAG_NORMAL, &color);
+      GtkCssProvider* provider = gtk_css_provider_new();
+      GdkDisplay* display = gdk_display_get_default();
+      GdkScreen* screen = gdk_display_get_default_screen(display);
 
-      GdkDisplay *display = gdk_window_get_display (gtk_widget_get_window (gtk_window));
+      gtk_style_context_add_provider_for_screen(screen,
+                                                GTK_STYLE_PROVIDER (provider),
+                                                GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+      gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(provider),
+                                      "GtkWindow {background-color: black;}\n", -1, NULL);
+      g_object_unref(provider);
+
       visible_cursor = NULL;
       invisible_cursor = gdk_cursor_new_for_display (display, GDK_BLANK_CURSOR);
 
