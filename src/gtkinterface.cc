@@ -84,6 +84,7 @@ GtkInterface::have_x11_display()
   if (!display)
     display = XOpenDisplay (NULL);   // this should work if and only if we do have an X11 server we can use
 
+  gdk_set_allowed_backends ("x11");
   return display != NULL;
 }
 
