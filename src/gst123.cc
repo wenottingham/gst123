@@ -839,17 +839,17 @@ cb_print_position (gpointer *data)
   if (gst_element_query_position (player.playbin, GST_FORMAT_TIME, &pos) &&
       gst_element_query_duration (player.playbin, GST_FORMAT_TIME, &len))
     {
-      GTimeVal tv_pos, tv_len;
-      GST_TIME_TO_TIMEVAL (pos, tv_pos);
-      GST_TIME_TO_TIMEVAL (len, tv_len);
-
-      glong pos_min = tv_pos.tv_sec / 60;
-      glong len_min = tv_len.tv_sec / 60;
+      gint64 pos_sec = pos / GST_SECOND;
+      gint64 len_sec = len / GST_SECOND;
+      gint64 pos_usec = (pos - pos_sec * GST_SECOND) / GST_USECOND;
+      gint64 len_usec = (len - len_sec * GST_SECOND) / GST_USECOND;
+      gint64 pos_min = pos_sec / 60;
+      gint64 len_min = len_sec / 60;
 
       player.overwrite_time_display();
-      Msg::print ("\rTime: %01lu:%02lu:%02lu.%02lu", pos_min / 60, pos_min % 60, tv_pos.tv_sec % 60, tv_pos.tv_usec / 10000);
+      Msg::print ("\rTime: %01lu:%02lu:%02lu.%02lu", pos_min / 60, pos_min % 60, pos_sec % 60, pos_usec / 10000);
       if (len > 0)   /* streams (i.e. http) have len == -1 */
-	Msg::print (" of %01lu:%02lu:%02lu.%02lu", len_min / 60, len_min % 60, tv_len.tv_sec % 60, tv_len.tv_usec / 10000);
+	Msg::print (" of %01lu:%02lu:%02lu.%02lu", len_min / 60, len_min % 60, len_sec % 60, len_usec / 10000);
 
       string message = Msg::status();
       if (message != "")
