@@ -46,6 +46,7 @@ class GtkInterface
   enum ScreenSaverSetting { SUSPEND, RESUME };
   void screen_saver (ScreenSaverSetting setting);
   void send_net_active_window_event();
+  bool is_wayland();
   bool is_fullscreen();
   bool is_maximized();
   void resize_window_if_needed();

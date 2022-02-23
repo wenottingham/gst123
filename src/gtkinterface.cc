@@ -24,7 +24,12 @@
 #include <gtk/gtk.h>
 #include <X11/Xlib.h>
 #include <gdk/gdkkeysyms.h>
+#ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
+#endif
+#ifdef GDK_WINDOWING_WAYLAND
+#include <gdk/gdkwayland.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 
@@ -169,6 +174,19 @@ GtkInterface::toggle_fullscreen()
       else
         gtk_window_fullscreen (GTK_WINDOW (gtk_window));
     }
+}
+
+bool
+GtkInterface::is_wayland()
+{
+#ifdef GDK_WINDOWING_WAYLAND
+  GdkDisplay* display = gdk_display_get_default();
+
+  if (GDK_IS_WAYLAND_DISPLAY (display)) {
+    return true;
+  }
+#endif
+  return false;
 }
 
 bool
@@ -387,7 +405,7 @@ void
 GtkInterface::screen_saver (ScreenSaverSetting setting)
 {
   GdkWindow *window = gtk_widget_get_window (gtk_window);
-  if (gtk_window != NULL && window)
+  if (gtk_window != NULL && window && !is_wayland())
     {
       guint64 wid = GDK_WINDOW_XID (window);
 

@@ -1068,11 +1068,13 @@ main (gint   argc,
 {
   Player player;
 
+#ifdef GDK_WINDOWING_X11
   if (XInitThreads() == 0)
     {
       fprintf (stderr, "%s: Failed to initialize Xlib support for concurrent threads (XInitThreads() failed).\n", argv[0]);
       return -1;
     }
+#endif
 
   /* Setup options */
   options.parse (argc, argv);

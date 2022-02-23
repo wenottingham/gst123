@@ -1,13 +1,3 @@
-- make keyboard shortcuts configurable
-  * use MicroConf to parse config file
-  * make it possible to have vim-like seek keys
-    (configure hjkl keyboard shortcuts to arrow keys)
 - fix terminal settings after crash
-
-wishlist:
-- wav output with --wav foo.wav
-- gapless playback
-- OSD - https://bugzilla.redhat.com/show_bug.cgi?id=603682
-- implement a way to disable album-art images completely
-- Sometimes video windows come up at the wrong size (tiny)
-- window title parameter
+- fix titlebar in wayland
+- fix idle inhibition in wayland (and in general)
