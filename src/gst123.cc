@@ -600,7 +600,7 @@ public:
   callback (gpointer *data)
   {
     IdleResizeWindow *self = (IdleResizeWindow *) data;
-    gtk_interface.resize (self->width, self->height);
+    gtk_interface.show (self->width, self->height);
     delete self;
 
     /* do not call me again */
@@ -659,26 +659,6 @@ collect_print_elements (GstElement *parent, const list<GstElement*>& elements)
     return element_name + " (" + child_elements + " )";
   else
     return element_name;
-}
-
-static GstBusSyncReply
-my_sync_bus_callback (GstBus * bus, GstMessage * message, gpointer data)
-{
-  switch (GST_MESSAGE_TYPE (message)) {
-    case GST_MESSAGE_ELEMENT:
-      {
-        if (gst_is_video_overlay_prepare_window_handle_message (message) && gtk_interface.init_ok())
-          {
-            gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY (GST_MESSAGE_SRC (message)), gtk_interface.window_xid_nolock());
-          }
-      }
-      break;
-    default:
-      /* unhandled message */
-      break;
-  }
-
-  return GST_BUS_PASS;
 }
 
 static gboolean
@@ -794,9 +774,7 @@ my_bus_callback (GstBus * bus, GstMessage * message, gpointer data)
 
       if (gtk_interface.init_ok())
         {
-          if (n_video || vis_plugin)
-            gtk_interface.show();
-          else
+          if (!(n_video || vis_plugin))
             gtk_interface.hide();
         }
     }
@@ -1156,6 +1134,18 @@ main (gint   argc,
       GstElement *fakesink = gst_element_factory_make ("fakesink", "novid");
       g_object_set (G_OBJECT (player.playbin), "video-sink", fakesink, NULL);
     }
+  else
+    {
+      GstElement *video_sink = gst_element_factory_make ("gtkglsink", "sink");
+      GstElement *glsinkbin = gst_element_factory_make ("glsinkbin", "glsinkbin");
+      GtkWidget *widget;
+
+      g_object_set (G_OBJECT (glsinkbin), "sink", video_sink, NULL);
+      g_object_set (G_OBJECT (player.playbin), "video-sink", glsinkbin, NULL);
+      g_object_get (G_OBJECT (video_sink), "widget", &widget, NULL);
+      gtk_interface.set_video_widget(widget);
+    }
+
   if (options.visualization)
     {
       if (!Visualization::setup (player.playbin))
@@ -1205,7 +1195,6 @@ main (gint   argc,
 
   /* Setup callbacks */
   GstBus *bus = gst_pipeline_get_bus (GST_PIPELINE (player.playbin));
-  gst_bus_set_sync_handler (bus, my_sync_bus_callback, &player, NULL);
   gst_bus_add_watch (bus, my_bus_callback, &player);
   gst_object_unref (bus);
 

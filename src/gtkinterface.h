@@ -27,8 +27,8 @@
 class GtkInterface
 {
   GtkWidget   *gtk_window;
+  GtkWidget   *video_widget;
   bool         gtk_window_visible;
-  gulong       window_xid;
   KeyHandler  *key_handler;
   GdkCursor   *invisible_cursor;
   GdkCursor   *visible_cursor;
@@ -54,20 +54,19 @@ public:
 
   void init (int *argc, char ***argv, class KeyHandler *key_handler);
   void end();
-  void show();
+  void show(int width, int height);
   void hide();
   bool init_ok();
-  gulong window_xid_nolock() const;
   void toggle_fullscreen();
   bool handle_keypress_event (GdkEventKey *event);
   bool handle_motion_notify_event (GdkEventMotion *event);
   bool handle_window_state_event (GdkEventWindowState *event);
   bool handle_timeout();
   bool handle_close();
-  void resize (int width, int height);
   void normal_size();
   void set_opacity (double alpha_change);
   void set_title (const std::string& title);
+  void set_video_widget (GtkWidget *widget);
 };
 
 #endif

@@ -77,7 +77,6 @@ window_state_event_cb (GtkWidget *widget,
 }
 
 GtkInterface::GtkInterface() :
-  window_xid (0),
   video_width (0),
   video_height (0),
   video_fullscreen (false),
@@ -102,8 +101,6 @@ GtkInterface::init (int *argc, char ***argv, KeyHandler *handler)
       g_object_set (G_OBJECT (gtk_window), "events", GDK_POINTER_MOTION_MASK, NULL);
 
       gtk_widget_realize (gtk_window);
-
-      window_xid = GDK_WINDOW_XID (gtk_widget_get_window (gtk_window));
 
       video_fullscreen = Options::the().fullscreen;    // initially fullscreen?
 
@@ -180,29 +177,28 @@ GtkInterface::init_ok()
   return gtk_window != NULL;
 }
 
-// unlike other methods, this method may be called from any thread without lock
-gulong
-GtkInterface::window_xid_nolock() const
-{
-  return window_xid;
-}
-
 void
-GtkInterface::show()
+GtkInterface::show(int width, int height)
 {
+  video_width = width;
+  video_height = height;
   if (gtk_window != NULL && !gtk_window_visible)
     {
       // resize avoids showing big windows (avoids vertical or horizontal maximization)
-      gtk_window_resize (GTK_WINDOW (gtk_window), 100, 100);
+      gtk_window_resize (GTK_WINDOW (gtk_window), width, height);
 
       gtk_widget_show_all (gtk_window);
 
       // restore fullscreen & maximized state
-      if (video_fullscreen)
+      if (video_fullscreen) {
         gtk_window_fullscreen (GTK_WINDOW (gtk_window));
+        need_resize_window = true;
+      }
 
-      if (video_maximized)
+      if (video_maximized) {
         gtk_window_maximize (GTK_WINDOW (gtk_window));
+        need_resize_window = true;
+      }
 
       // get cursor, so we can restore it after hiding it
       if (!visible_cursor)
@@ -245,24 +241,6 @@ GtkInterface::end()
   if (gtk_window != NULL)
     {
       screen_saver (RESUME);
-    }
-}
-
-
-void
-GtkInterface::resize (int width, int height)
-{
-  if (gtk_window != NULL)
-    {
-      video_width = width;
-      video_height = height;
-
-      need_resize_window = true;
-
-      // there are some cases where resizing the window will not work right away (fullscreen)
-      // then need_resize_window remains true and the resize will be done once the window
-      // state changes
-      resize_window_if_needed();
     }
 }
 
@@ -333,6 +311,14 @@ GtkInterface::set_title (const string& title)
 {
   if (gtk_window != NULL)
     gtk_window_set_title (GTK_WINDOW (gtk_window), title.c_str());
+}
+
+void
+GtkInterface::set_video_widget (GtkWidget *widget)
+{
+  video_widget = widget;
+  gtk_container_add (GTK_CONTAINER(gtk_window), video_widget);
+  gtk_widget_show (video_widget);
 }
 
 bool
