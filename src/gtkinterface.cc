@@ -98,6 +98,9 @@ GtkInterface::init (int *argc, char ***argv, KeyHandler *handler)
   if (gtk_init_check (argc, argv))
     {
       gtk_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+      headerbar = gtk_header_bar_new ();
+      gtk_header_bar_set_show_close_button (GTK_HEADER_BAR (headerbar), true);
+      gtk_window_set_titlebar (GTK_WINDOW (gtk_window), headerbar);
       gtk_window_set_icon_name (GTK_WINDOW (gtk_window), "multimedia-player");
       g_signal_connect (G_OBJECT (gtk_window), "key-press-event", G_CALLBACK (key_press_event_cb), this);
       g_signal_connect (G_OBJECT (gtk_window), "motion-notify-event", G_CALLBACK (motion_notify_event_cb), this);
@@ -169,10 +172,13 @@ GtkInterface::toggle_fullscreen()
 {
   if (gtk_window != NULL && gtk_window_visible)
     {
-      if (is_fullscreen())
+      if (is_fullscreen()) {
         gtk_window_unfullscreen (GTK_WINDOW (gtk_window));
-      else
+        gtk_widget_show (headerbar);
+      } else {
         gtk_window_fullscreen (GTK_WINDOW (gtk_window));
+        gtk_widget_hide (headerbar);
+      }
     }
 }
 
@@ -210,7 +216,10 @@ GtkInterface::show(int width, int height)
       // restore fullscreen & maximized state
       if (video_fullscreen) {
         gtk_window_fullscreen (GTK_WINDOW (gtk_window));
+        gtk_widget_hide (headerbar);
         need_resize_window = true;
+      } else {
+        gtk_widget_show (headerbar);
       }
 
       if (video_maximized) {

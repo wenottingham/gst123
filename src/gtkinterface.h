@@ -28,6 +28,7 @@ class GtkInterface
 {
   GtkWidget   *gtk_window;
   GtkWidget   *video_widget;
+  GtkWidget   *headerbar;
   bool         gtk_window_visible;
   KeyHandler  *key_handler;
   GdkCursor   *invisible_cursor;

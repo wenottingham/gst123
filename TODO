@@ -1,3 +1,2 @@
 - fix terminal settings after crash
-- fix titlebar in wayland
 - fix idle inhibition in wayland (and in general)
