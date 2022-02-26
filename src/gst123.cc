@@ -1131,6 +1131,12 @@ main (gint   argc,
       return -1;
     }
   player.playbin = gst_element_factory_make("playbin", "play");
+  GstElement *video_sink = gst_element_factory_make ("gtkglsink", "sink");
+  if (video_sink == NULL)
+    {
+      std::cerr << "Could not initialize gtkglsink. Disabling video support." << std::endl;
+      options.novideo = true;
+    }
   if (options.novideo)
     {
       GstElement *fakesink = gst_element_factory_make ("fakesink", "novid");
@@ -1138,7 +1144,6 @@ main (gint   argc,
     }
   else
     {
-      GstElement *video_sink = gst_element_factory_make ("gtkglsink", "sink");
       GstElement *glsinkbin = gst_element_factory_make ("glsinkbin", "glsinkbin");
       GtkWidget *widget;
 
