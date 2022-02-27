@@ -1,2 +1,1 @@
-- fix terminal settings after crash
 - fix idle inhibition in wayland (and in general)
